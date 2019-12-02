@@ -41,6 +41,11 @@
   dependencies:
     assemblyscript "https://github.com/AssemblyScript/assemblyscript#36040d5b5312f19a025782b5e36663823494c2f3"
 
+"@oceanprotocol/keeper-contracts@0.12.7":
+  version "0.12.7"
+  resolved "https://registry.yarnpkg.com/@oceanprotocol/keeper-contracts/-/keeper-contracts-0.12.7.tgz#8a095a7080f3b330b2b4afad0393c1139f5fb6e3"
+  integrity sha512-7EUBO3iAkm78VnQHCp5pCrjZ4EQ0omg/bsWo2uiUO6oW8L4bptqSolS2b19HA1zb/ZsmJuW6e6JerPMRtQtqEg==
+
 "@protobufjs/utf8@^1.1.0":
   version "1.1.0"
   resolved "https://registry.npmjs.org/@protobufjs/utf8/-/utf8-1.1.0.tgz#a777360b5b39a1a2e5106f8e858f2fd2d060c570"
@@ -212,9 +217,9 @@ asn1@~0.2.3:
   dependencies:
     safer-buffer "~2.1.0"
 
-"assemblyscript@git+https://github.com/AssemblyScript/assemblyscript.git#36040d5b5312f19a025782b5e36663823494c2f3":
+"assemblyscript@https://github.com/AssemblyScript/assemblyscript#36040d5b5312f19a025782b5e36663823494c2f3":
   version "0.6.0"
-  resolved "git+https://github.com/AssemblyScript/assemblyscript.git#36040d5b5312f19a025782b5e36663823494c2f3"
+  resolved "https://github.com/AssemblyScript/assemblyscript#36040d5b5312f19a025782b5e36663823494c2f3"
   dependencies:
     "@protobufjs/utf8" "^1.1.0"
     binaryen "77.0.0-nightly.20190407"

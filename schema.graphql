@@ -1,6 +1,94 @@
-type Gravatar @entity {
+type DIDRegistry @entity {
   id: ID!
   owner: Bytes!
-  displayName: String!
-  imageUrl: String!
+  checksum: Bytes!
+  value: String!
+  lastUpdatedBy: Bytes!
+  providers: [Bytes!]
+  permissions: [DIDGrantee!]
+  lastBlockUpdated: BigInt!
+}
+
+type DIDGrantee @entity {
+  id: ID!
+  did: Bytes!
+  grantee: Bytes!
+  allowed: Boolean!
+  lastBlockUpdated: BigInt!
+}
+
+enum SEATemplateState {
+  UNINITIALIZED
+  PROPOSED
+  APPROVED
+  REVOKED
+}
+
+type SEATemplate @entity {
+  id: ID!
+  state: SEATemplateState!
+  owner: Bytes!
+  lastUpdatedBy: Bytes!
+  blockNumberUpdated: BigInt!
+}
+
+enum SEAConditionState {
+  UNINITIALIZED
+  UNFULFILLED
+  FULFILLED
+  ABORTED
+}
+
+type SEACondition @entity {
+  id: ID!
+  state: SEAConditionState!
+  contractAddress: Bytes!
+  timeLock: BigInt!
+  timeOut: BigInt!
+  lastUpdatedBy: Bytes!
+  blockNumberUpdated: BigInt!
+}
+
+enum SEATemplateType {
+  ESCROW_ACCESS_SECRETSTORE
+  ESCROW_COMPUTE_EXECUTION
+}
+
+type ServiceAgreement @entity {
+  id: ID!
+  template: SEATemplateType!
+  did: Bytes!
+  accessConsumer: Bytes!
+  accessProvider: Bytes!
+  timeLocks: [BigInt!]
+  timeOuts: [BigInt!]
+  conditions: [SEACondition!]
+  lastBlockUpdated: BigInt!
+}
+
+type AccessSecretStoreCondition @entity {
+  id: ID!
+  agreement: ServiceAgreement!
+  documentId: Bytes!
+  grantee: Bytes!
+  conditionId: SEACondition!
+  lastBlockUpdated: BigInt!
+}
+
+type LockRewardCondition @entity {
+  id: ID!
+  agreement: ServiceAgreement!
+  rewardAddress: Bytes!
+  amount: BigInt!
+  conditionId: SEACondition!
+  lastBlockUpdated: BigInt!
+}
+
+type EscrowRewardCondition @entity {
+  id: ID!
+  agreement: ServiceAgreement!
+  receiver: Bytes!
+  amount: BigInt!
+  conditionId: SEACondition!
+  lastBlockUpdated: BigInt!
 }

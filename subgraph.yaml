@@ -1,27 +1,193 @@
 specVersion: 0.0.2
-description: Gravatar for Ethereum
-repository: https://github.com/graphprotocol/example-subgraph
+description: OceanProtocol Subgraph
+repository: https://github.com/santteegt/oceanprotocol-subgraph
 schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: Gravity
-    network: mainnet
+    name: DIDRegistry
+    network: pacific
     source:
-      address: '0x2E645469f354BB4F5c8a05B3b30A929361cf77eC'
-      abi: Gravity
+      address: '0x1f0E059a50356D8617980F8fa21a53F723072712'
+      abi: DIDRegistry
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
       language: wasm/assemblyscript
       entities:
-        - Gravatar
+        - DIDRegistry
+        - DIDPermissions
       abis:
-        - name: Gravity
-          file: ./abis/Gravity.json
+        - name: DIDRegistry
+          file: ./abis/DIDRegistry.json
       eventHandlers:
-        - event: NewGravatar(uint256,address,string,string)
-          handler: handleNewGravatar
-        - event: UpdatedGravatar(uint256,address,string,string)
-          handler: handleUpdatedGravatar
+        - event: DIDAttributeRegistered(indexed bytes32,indexed address,indexed bytes32,string,address,uint256)
+          handler: handleNewDIDRegistry
+        - event: DIDOwnershipTransferred(bytes32,address,address)
+          handler: handletTransferredDIDOwnership
+        - event: DIDProviderAdded(bytes32,address)
+          handler: handletDIDProviderAdded
+        - event: DIDProviderRemoved(bytes32,address,bool)
+          handler: handletDIDProviderRemoved
+        - event: DIDPermissionGranted(indexed bytes32,indexed address,indexed address)
+          handler: handletDIDPermissionGranted
+        - event: DIDPermissionRevoked(indexed bytes32,indexed address,indexed address)
+          handler: handletDIDPermissionRevoked
+      callHandlers:
+        - function: registerAttribute(bytes32,bytes32,address[],string)
+          handler: handleNewDIDRegistryCall
       file: ./src/mapping.ts
+
+  - kind: ethereum/contract
+    name: SEATemplateStore
+    network: pacific
+    source:
+      address: '0x9BF43606d833489fbD568ace13f535fC41130c28'
+      abi: TemplateStoreManager
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - SEATemplate
+      abis:
+        - name: TemplateStoreManager
+          file: ./abis/TemplateStoreManager.json
+      callHandlers:
+        - function: proposeTemplate(address)
+          handler: handleNewTemplateProposal
+        - function: approveTemplate(address)
+          handler: handleNewTemplateApproval
+        - function: revokeTemplate(address)
+          handler: handleNewTemplateRevoke
+      file: ./src/mappingSEA.ts
+
+  - kind: ethereum/contract
+    name: SEAConditionStore
+    network: pacific
+    source:
+      address: '0xbD1dEd7ef05c31F81C54e913a23Da69E77d3e0EE'
+      abi: ConditionStoreManager
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - SEACondition
+      abis:
+        - name: ConditionStoreManager
+          file: ./abis/ConditionStoreManager.json
+      eventHandlers:
+        - event: ConditionCreated(indexed bytes32,indexed address,indexed address)
+          handler: handleNewCondition
+        - event: ConditionUpdated(indexed bytes32,indexed address,indexed uint8,address)
+          handler: handleConditionUpdated
+      file: ./src/mappingSEA.ts
+
+  - kind: ethereum/contract
+    name: EscrowAccessSecretStoreTemplate
+    network: pacific
+    source:
+      address: '0x9BF43606d833489fbD568ace13f535fC41130c28'
+      abi: EscrowAccessSecretStoreTemplate
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - ServiceAgreement
+      abis:
+        - name: EscrowAccessSecretStoreTemplate
+          file: ./abis/EscrowAccessSecretStoreTemplate.json
+      eventHandlers:
+        - event: AgreementCreated(indexed bytes32,bytes32,indexed address,indexed address,uint256[],uint256[])
+          handler: handleNewEscrowAccessSecretStoreSEA
+      callHandlers:
+        - function: createAgreement(bytes32,bytes32,bytes32[],uint256[],uint256[],address)
+          handler: handleNewSEACall
+      file: ./src/mappingTemplates.ts
+
+  - kind: ethereum/contract
+    name: AccessSecretStoreCondition
+    network: pacific
+    source:
+      address: '0x7FC6520Af3F0800d76A3e2FfE7b838c945ADBFE4'
+      abi: AccessSecretStoreCondition
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - AccessSecretStoreCondition
+      abis:
+        - name: AccessSecretStoreCondition
+          file: ./abis/AccessSecretStoreCondition.json
+      eventHandlers:
+        - event: Fulfilled(indexed bytes32,indexed bytes32,indexed address,bytes32)
+          handler: handleFulfilledAccessSecretStoreCondition
+      file: ./src/mappingConditions.ts
+
+  - kind: ethereum/contract
+    name: LockRewardCondition
+    network: pacific
+    source:
+      address: '0x7bf64DaCc7929A1e5466f7d9E575128abf1875f8'
+      abi: LockRewardCondition
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - LockRewardCondition
+      abis:
+        - name: LockRewardCondition
+          file: ./abis/LockRewardCondition.json
+      eventHandlers:
+        - event: Fulfilled(indexed bytes32,indexed address,bytes32,uint256)
+          handler: handleFulfilledLockRewardCondition
+      file: ./src/mappingConditions.ts
+
+  - kind: ethereum/contract
+    name: EscrowRewardCondition
+    network: pacific
+    source:
+      address: '0x656Aa3D9b37A6eA770701ae2c612f760d9254A66'
+      abi: EscrowReward
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - EscrowRewardCondition
+      abis:
+        - name: EscrowReward
+          file: ./abis/EscrowReward.json
+      eventHandlers:
+        - event: Fulfilled(indexed bytes32,indexed address,bytes32,uint256)
+          handler: handleFulfilledEscrowRewardCondition
+      file: ./src/mappingConditions.ts
+
+  # - kind: ethereum/contract
+  #   name: TokenDispenser
+  #   network: nile
+  #   source:
+  #     address: '0x865396b7ddc58C693db7FCAD1168E3BD95Fe3368'
+  #     abi: Dispenser
+  #   mapping:
+  #     kind: ethereum/events
+  #     apiVersion: 0.0.3
+  #     language: wasm/assemblyscript
+  #     entities:
+  #       - Dispenser
+  #     abis:
+  #       - name: Dispenser
+  #         file: ./abis/Dispenser.json
+  #     eventHandlers:
+  #       - event: RequestFrequencyExceeded(indexed address,uint256)
+  #         handler: handleDispenserFrequencyExceeded
+  #       - event: RequestLimitExceeded(indexed address,uint256,uint256)
+  #         handler: handleDispenserLimitExceeded
+  #     callHandlers:
+  #       - function: requestTokens(uint256)
+  #         handler: handleDispenserRequest
+  #     file: ./src/mapping.ts
