@@ -123,7 +123,10 @@ export class ConditionStoreManager__getConditionResult {
   toMap(): TypedMap<string, EthereumValue> {
     let map = new TypedMap<string, EthereumValue>();
     map.set("value0", EthereumValue.fromAddress(this.value0));
-    map.set("value1", EthereumValue.fromI32(this.value1));
+    map.set(
+      "value1",
+      EthereumValue.fromUnsignedBigInt(BigInt.fromI32(this.value1))
+    );
     map.set("value2", EthereumValue.fromUnsignedBigInt(this.value2));
     map.set("value3", EthereumValue.fromUnsignedBigInt(this.value3));
     map.set("value4", EthereumValue.fromUnsignedBigInt(this.value4));
@@ -272,7 +275,7 @@ export class ConditionStoreManager extends SmartContract {
   updateConditionState(_id: Bytes, _newState: i32): i32 {
     let result = super.call("updateConditionState", [
       EthereumValue.fromFixedBytes(_id),
-      EthereumValue.fromI32(_newState)
+      EthereumValue.fromUnsignedBigInt(BigInt.fromI32(_newState))
     ]);
 
     return result[0].toI32();
@@ -281,7 +284,7 @@ export class ConditionStoreManager extends SmartContract {
   try_updateConditionState(_id: Bytes, _newState: i32): CallResult<i32> {
     let result = super.tryCall("updateConditionState", [
       EthereumValue.fromFixedBytes(_id),
-      EthereumValue.fromI32(_newState)
+      EthereumValue.fromUnsignedBigInt(BigInt.fromI32(_newState))
     ]);
     if (result.reverted) {
       return new CallResult();

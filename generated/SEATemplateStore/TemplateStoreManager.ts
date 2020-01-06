@@ -15,6 +15,80 @@ import {
   CallResult
 } from "@graphprotocol/graph-ts";
 
+export class TemplateProposed extends EthereumEvent {
+  get params(): TemplateProposed__Params {
+    return new TemplateProposed__Params(this);
+  }
+}
+
+export class TemplateProposed__Params {
+  _event: TemplateProposed;
+
+  constructor(event: TemplateProposed) {
+    this._event = event;
+  }
+
+  get Id(): Bytes {
+    return this._event.parameters[0].value.toBytes();
+  }
+
+  get name(): Bytes {
+    return this._event.parameters[1].value.toBytes();
+  }
+
+  get conditionTypes(): Array<Address> {
+    return this._event.parameters[2].value.toAddressArray();
+  }
+
+  get actorTypeIds(): Array<Bytes> {
+    return this._event.parameters[3].value.toBytesArray();
+  }
+}
+
+export class TemplateApproved extends EthereumEvent {
+  get params(): TemplateApproved__Params {
+    return new TemplateApproved__Params(this);
+  }
+}
+
+export class TemplateApproved__Params {
+  _event: TemplateApproved;
+
+  constructor(event: TemplateApproved) {
+    this._event = event;
+  }
+
+  get Id(): Bytes {
+    return this._event.parameters[0].value.toBytes();
+  }
+
+  get state(): boolean {
+    return this._event.parameters[1].value.toBoolean();
+  }
+}
+
+export class TemplateRevoked extends EthereumEvent {
+  get params(): TemplateRevoked__Params {
+    return new TemplateRevoked__Params(this);
+  }
+}
+
+export class TemplateRevoked__Params {
+  _event: TemplateRevoked;
+
+  constructor(event: TemplateRevoked) {
+    this._event = event;
+  }
+
+  get Id(): Bytes {
+    return this._event.parameters[0].value.toBytes();
+  }
+
+  get state(): boolean {
+    return this._event.parameters[1].value.toBoolean();
+  }
+}
+
 export class OwnershipTransferred extends EthereumEvent {
   get params(): OwnershipTransferred__Params {
     return new OwnershipTransferred__Params(this);
@@ -42,20 +116,36 @@ export class TemplateStoreManager__getTemplateResult {
   value1: Address;
   value2: Address;
   value3: BigInt;
+  value4: Array<Address>;
+  value5: Array<Bytes>;
 
-  constructor(value0: i32, value1: Address, value2: Address, value3: BigInt) {
+  constructor(
+    value0: i32,
+    value1: Address,
+    value2: Address,
+    value3: BigInt,
+    value4: Array<Address>,
+    value5: Array<Bytes>
+  ) {
     this.value0 = value0;
     this.value1 = value1;
     this.value2 = value2;
     this.value3 = value3;
+    this.value4 = value4;
+    this.value5 = value5;
   }
 
   toMap(): TypedMap<string, EthereumValue> {
     let map = new TypedMap<string, EthereumValue>();
-    map.set("value0", EthereumValue.fromI32(this.value0));
+    map.set(
+      "value0",
+      EthereumValue.fromUnsignedBigInt(BigInt.fromI32(this.value0))
+    );
     map.set("value1", EthereumValue.fromAddress(this.value1));
     map.set("value2", EthereumValue.fromAddress(this.value2));
     map.set("value3", EthereumValue.fromUnsignedBigInt(this.value3));
+    map.set("value4", EthereumValue.fromAddressArray(this.value4));
+    map.set("value5", EthereumValue.fromFixedBytesArray(this.value5));
     return map;
   }
 }
@@ -95,17 +185,52 @@ export class TemplateStoreManager extends SmartContract {
     return CallResult.fromValue(value[0].toBoolean());
   }
 
-  proposeTemplate(_id: Address): BigInt {
+  generateId(templateName: string): Bytes {
+    let result = super.call("generateId", [
+      EthereumValue.fromString(templateName)
+    ]);
+
+    return result[0].toBytes();
+  }
+
+  try_generateId(templateName: string): CallResult<Bytes> {
+    let result = super.tryCall("generateId", [
+      EthereumValue.fromString(templateName)
+    ]);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toBytes());
+  }
+
+  proposeTemplate(
+    _id: Address,
+    _conditionTypes: Array<Address>,
+    _actorTypeIds: Array<Bytes>,
+    name: string
+  ): BigInt {
     let result = super.call("proposeTemplate", [
-      EthereumValue.fromAddress(_id)
+      EthereumValue.fromAddress(_id),
+      EthereumValue.fromAddressArray(_conditionTypes),
+      EthereumValue.fromFixedBytesArray(_actorTypeIds),
+      EthereumValue.fromString(name)
     ]);
 
     return result[0].toBigInt();
   }
 
-  try_proposeTemplate(_id: Address): CallResult<BigInt> {
+  try_proposeTemplate(
+    _id: Address,
+    _conditionTypes: Array<Address>,
+    _actorTypeIds: Array<Bytes>,
+    name: string
+  ): CallResult<BigInt> {
     let result = super.tryCall("proposeTemplate", [
-      EthereumValue.fromAddress(_id)
+      EthereumValue.fromAddress(_id),
+      EthereumValue.fromAddressArray(_conditionTypes),
+      EthereumValue.fromFixedBytesArray(_actorTypeIds),
+      EthereumValue.fromString(name)
     ]);
     if (result.reverted) {
       return new CallResult();
@@ -114,21 +239,79 @@ export class TemplateStoreManager extends SmartContract {
     return CallResult.fromValue(value[0].toBigInt());
   }
 
-  getTemplate(_id: Address): TemplateStoreManager__getTemplateResult {
-    let result = super.call("getTemplate", [EthereumValue.fromAddress(_id)]);
+  proposeTemplate1(
+    _id: Bytes,
+    _conditionTypes: Array<Address>,
+    _actorTypeIds: Array<Bytes>,
+    name: string
+  ): BigInt {
+    let result = super.call("proposeTemplate", [
+      EthereumValue.fromFixedBytes(_id),
+      EthereumValue.fromAddressArray(_conditionTypes),
+      EthereumValue.fromFixedBytesArray(_actorTypeIds),
+      EthereumValue.fromString(name)
+    ]);
+
+    return result[0].toBigInt();
+  }
+
+  try_proposeTemplate1(
+    _id: Bytes,
+    _conditionTypes: Array<Address>,
+    _actorTypeIds: Array<Bytes>,
+    name: string
+  ): CallResult<BigInt> {
+    let result = super.tryCall("proposeTemplate", [
+      EthereumValue.fromFixedBytes(_id),
+      EthereumValue.fromAddressArray(_conditionTypes),
+      EthereumValue.fromFixedBytesArray(_actorTypeIds),
+      EthereumValue.fromString(name)
+    ]);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toBigInt());
+  }
+
+  registerTemplateActorType(_actorType: string): Bytes {
+    let result = super.call("registerTemplateActorType", [
+      EthereumValue.fromString(_actorType)
+    ]);
+
+    return result[0].toBytes();
+  }
+
+  try_registerTemplateActorType(_actorType: string): CallResult<Bytes> {
+    let result = super.tryCall("registerTemplateActorType", [
+      EthereumValue.fromString(_actorType)
+    ]);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toBytes());
+  }
+
+  getTemplate(_id: Bytes): TemplateStoreManager__getTemplateResult {
+    let result = super.call("getTemplate", [EthereumValue.fromFixedBytes(_id)]);
 
     return new TemplateStoreManager__getTemplateResult(
       result[0].toI32(),
       result[1].toAddress(),
       result[2].toAddress(),
-      result[3].toBigInt()
+      result[3].toBigInt(),
+      result[4].toAddressArray(),
+      result[5].toBytesArray()
     );
   }
 
   try_getTemplate(
-    _id: Address
+    _id: Bytes
   ): CallResult<TemplateStoreManager__getTemplateResult> {
-    let result = super.tryCall("getTemplate", [EthereumValue.fromAddress(_id)]);
+    let result = super.tryCall("getTemplate", [
+      EthereumValue.fromFixedBytes(_id)
+    ]);
     if (result.reverted) {
       return new CallResult();
     }
@@ -138,9 +321,83 @@ export class TemplateStoreManager extends SmartContract {
         value[0].toI32(),
         value[1].toAddress(),
         value[2].toAddress(),
-        value[3].toBigInt()
+        value[3].toBigInt(),
+        value[4].toAddressArray(),
+        value[5].toBytesArray()
       )
     );
+  }
+
+  getTemplateActorTypeIds(): Array<Bytes> {
+    let result = super.call("getTemplateActorTypeIds", []);
+
+    return result[0].toBytesArray();
+  }
+
+  try_getTemplateActorTypeIds(): CallResult<Array<Bytes>> {
+    let result = super.tryCall("getTemplateActorTypeIds", []);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toBytesArray());
+  }
+
+  getTemplateActorTypeId(actorType: string): Bytes {
+    let result = super.call("getTemplateActorTypeId", [
+      EthereumValue.fromString(actorType)
+    ]);
+
+    return result[0].toBytes();
+  }
+
+  try_getTemplateActorTypeId(actorType: string): CallResult<Bytes> {
+    let result = super.tryCall("getTemplateActorTypeId", [
+      EthereumValue.fromString(actorType)
+    ]);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toBytes());
+  }
+
+  getTemplateActorTypeValue(_Id: Bytes): string {
+    let result = super.call("getTemplateActorTypeValue", [
+      EthereumValue.fromFixedBytes(_Id)
+    ]);
+
+    return result[0].toString();
+  }
+
+  try_getTemplateActorTypeValue(_Id: Bytes): CallResult<string> {
+    let result = super.tryCall("getTemplateActorTypeValue", [
+      EthereumValue.fromFixedBytes(_Id)
+    ]);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toString());
+  }
+
+  getTemplateActorTypeState(_Id: Bytes): BigInt {
+    let result = super.call("getTemplateActorTypeState", [
+      EthereumValue.fromFixedBytes(_Id)
+    ]);
+
+    return result[0].toBigInt();
+  }
+
+  try_getTemplateActorTypeState(_Id: Bytes): CallResult<BigInt> {
+    let result = super.tryCall("getTemplateActorTypeState", [
+      EthereumValue.fromFixedBytes(_Id)
+    ]);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toBigInt());
   }
 
   getTemplateListSize(): BigInt {
@@ -158,7 +415,26 @@ export class TemplateStoreManager extends SmartContract {
     return CallResult.fromValue(value[0].toBigInt());
   }
 
-  isTemplateApproved(_id: Address): boolean {
+  isTemplateApproved(_id: Bytes): boolean {
+    let result = super.call("isTemplateApproved", [
+      EthereumValue.fromFixedBytes(_id)
+    ]);
+
+    return result[0].toBoolean();
+  }
+
+  try_isTemplateApproved(_id: Bytes): CallResult<boolean> {
+    let result = super.tryCall("isTemplateApproved", [
+      EthereumValue.fromFixedBytes(_id)
+    ]);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toBoolean());
+  }
+
+  isTemplateApproved1(_id: Address): boolean {
     let result = super.call("isTemplateApproved", [
       EthereumValue.fromAddress(_id)
     ]);
@@ -166,7 +442,7 @@ export class TemplateStoreManager extends SmartContract {
     return result[0].toBoolean();
   }
 
-  try_isTemplateApproved(_id: Address): CallResult<boolean> {
+  try_isTemplateApproved1(_id: Address): CallResult<boolean> {
     let result = super.tryCall("isTemplateApproved", [
       EthereumValue.fromAddress(_id)
     ]);
@@ -284,12 +560,70 @@ export class ProposeTemplateCall__Inputs {
   get _id(): Address {
     return this._call.inputValues[0].value.toAddress();
   }
+
+  get _conditionTypes(): Array<Address> {
+    return this._call.inputValues[1].value.toAddressArray();
+  }
+
+  get _actorTypeIds(): Array<Bytes> {
+    return this._call.inputValues[2].value.toBytesArray();
+  }
+
+  get name(): string {
+    return this._call.inputValues[3].value.toString();
+  }
 }
 
 export class ProposeTemplateCall__Outputs {
   _call: ProposeTemplateCall;
 
   constructor(call: ProposeTemplateCall) {
+    this._call = call;
+  }
+
+  get size(): BigInt {
+    return this._call.outputValues[0].value.toBigInt();
+  }
+}
+
+export class ProposeTemplate1Call extends EthereumCall {
+  get inputs(): ProposeTemplate1Call__Inputs {
+    return new ProposeTemplate1Call__Inputs(this);
+  }
+
+  get outputs(): ProposeTemplate1Call__Outputs {
+    return new ProposeTemplate1Call__Outputs(this);
+  }
+}
+
+export class ProposeTemplate1Call__Inputs {
+  _call: ProposeTemplate1Call;
+
+  constructor(call: ProposeTemplate1Call) {
+    this._call = call;
+  }
+
+  get _id(): Bytes {
+    return this._call.inputValues[0].value.toBytes();
+  }
+
+  get _conditionTypes(): Array<Address> {
+    return this._call.inputValues[1].value.toAddressArray();
+  }
+
+  get _actorTypeIds(): Array<Bytes> {
+    return this._call.inputValues[2].value.toBytesArray();
+  }
+
+  get name(): string {
+    return this._call.inputValues[3].value.toString();
+  }
+}
+
+export class ProposeTemplate1Call__Outputs {
+  _call: ProposeTemplate1Call;
+
+  constructor(call: ProposeTemplate1Call) {
     this._call = call;
   }
 
@@ -315,8 +649,8 @@ export class ApproveTemplateCall__Inputs {
     this._call = call;
   }
 
-  get _id(): Address {
-    return this._call.inputValues[0].value.toAddress();
+  get _id(): Bytes {
+    return this._call.inputValues[0].value.toBytes();
   }
 }
 
@@ -345,8 +679,8 @@ export class RevokeTemplateCall__Inputs {
     this._call = call;
   }
 
-  get _id(): Address {
-    return this._call.inputValues[0].value.toAddress();
+  get _id(): Bytes {
+    return this._call.inputValues[0].value.toBytes();
   }
 }
 
@@ -354,6 +688,70 @@ export class RevokeTemplateCall__Outputs {
   _call: RevokeTemplateCall;
 
   constructor(call: RevokeTemplateCall) {
+    this._call = call;
+  }
+}
+
+export class RegisterTemplateActorTypeCall extends EthereumCall {
+  get inputs(): RegisterTemplateActorTypeCall__Inputs {
+    return new RegisterTemplateActorTypeCall__Inputs(this);
+  }
+
+  get outputs(): RegisterTemplateActorTypeCall__Outputs {
+    return new RegisterTemplateActorTypeCall__Outputs(this);
+  }
+}
+
+export class RegisterTemplateActorTypeCall__Inputs {
+  _call: RegisterTemplateActorTypeCall;
+
+  constructor(call: RegisterTemplateActorTypeCall) {
+    this._call = call;
+  }
+
+  get _actorType(): string {
+    return this._call.inputValues[0].value.toString();
+  }
+}
+
+export class RegisterTemplateActorTypeCall__Outputs {
+  _call: RegisterTemplateActorTypeCall;
+
+  constructor(call: RegisterTemplateActorTypeCall) {
+    this._call = call;
+  }
+
+  get actorTypeId(): Bytes {
+    return this._call.outputValues[0].value.toBytes();
+  }
+}
+
+export class DeregisterTemplateActorTypeCall extends EthereumCall {
+  get inputs(): DeregisterTemplateActorTypeCall__Inputs {
+    return new DeregisterTemplateActorTypeCall__Inputs(this);
+  }
+
+  get outputs(): DeregisterTemplateActorTypeCall__Outputs {
+    return new DeregisterTemplateActorTypeCall__Outputs(this);
+  }
+}
+
+export class DeregisterTemplateActorTypeCall__Inputs {
+  _call: DeregisterTemplateActorTypeCall;
+
+  constructor(call: DeregisterTemplateActorTypeCall) {
+    this._call = call;
+  }
+
+  get _Id(): Bytes {
+    return this._call.inputValues[0].value.toBytes();
+  }
+}
+
+export class DeregisterTemplateActorTypeCall__Outputs {
+  _call: DeregisterTemplateActorTypeCall;
+
+  constructor(call: DeregisterTemplateActorTypeCall) {
     this._call = call;
   }
 }
