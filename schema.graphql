@@ -92,3 +92,43 @@ type EscrowRewardCondition @entity {
   conditionId: SEACondition!
   lastBlockUpdated: BigInt!
 }
+
+type Fulfillment @entity {
+  id: ID!
+  bounty: Bounty @derivedFrom(field: "fulfillments")
+  fulfillers: [Bytes!]
+  payouts: [BigInt!]
+  submitter: Bytes
+  data: String!
+  accepted: Boolean!
+}
+
+type Contribution @entity {
+  id: ID!
+  bounty: Bounty @derivedFrom(field: "contributions")
+  contributor: Bytes!
+  amount: BigInt!
+  refunded: Boolean!
+}
+
+enum BountyStage {
+  ACTIVE
+  FULFILLED
+  DEAD
+}
+
+type Bounty @entity {
+  id: ID!
+  creator: Bytes!
+  issuers: [Bytes!]
+  approvers: [Bytes!]
+  data: String!
+  deadline: BigInt!
+  token: Bytes!
+  tokenVersion: BigInt!
+  balance: BigInt
+  hasPaidout: Boolean!
+  fulfillments: [Fulfillment!]
+  contributions: [Contribution!]
+  status: BountyStage!
+}

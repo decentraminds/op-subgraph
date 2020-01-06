@@ -1,4 +1,5 @@
 # Logs
+data/
 build/
 logs
 *.log

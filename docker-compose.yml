@@ -15,7 +15,8 @@ services:
       postgres_pass: let-me-in
       postgres_db: graph-node
       ipfs: 'ipfs:5001'
-      ethereum: 'pacific:https://pacific.oceanprotocol.com'
+      # ethereum: 'pacific:https://pacific.oceanprotocol.com'
+      ethereum: 'nile:https://nile.dev-ocean.com/'
       RUST_LOG: info
   ipfs:
     image: ipfs/go-ipfs

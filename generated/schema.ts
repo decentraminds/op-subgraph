@@ -707,3 +707,374 @@ export class EscrowRewardCondition extends Entity {
     this.set("lastBlockUpdated", Value.fromBigInt(value));
   }
 }
+
+export class Fulfillment extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save Fulfillment entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save Fulfillment entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("Fulfillment", id.toString(), this);
+  }
+
+  static load(id: string): Fulfillment | null {
+    return store.get("Fulfillment", id) as Fulfillment | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get bounty(): string | null {
+    let value = this.get("bounty");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toString();
+    }
+  }
+
+  set bounty(value: string | null) {
+    if (value === null) {
+      this.unset("bounty");
+    } else {
+      this.set("bounty", Value.fromString(value as string));
+    }
+  }
+
+  get fulfillers(): Array<Bytes> | null {
+    let value = this.get("fulfillers");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBytesArray();
+    }
+  }
+
+  set fulfillers(value: Array<Bytes> | null) {
+    if (value === null) {
+      this.unset("fulfillers");
+    } else {
+      this.set("fulfillers", Value.fromBytesArray(value as Array<Bytes>));
+    }
+  }
+
+  get payouts(): Array<BigInt> | null {
+    let value = this.get("payouts");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBigIntArray();
+    }
+  }
+
+  set payouts(value: Array<BigInt> | null) {
+    if (value === null) {
+      this.unset("payouts");
+    } else {
+      this.set("payouts", Value.fromBigIntArray(value as Array<BigInt>));
+    }
+  }
+
+  get submitter(): Bytes | null {
+    let value = this.get("submitter");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set submitter(value: Bytes | null) {
+    if (value === null) {
+      this.unset("submitter");
+    } else {
+      this.set("submitter", Value.fromBytes(value as Bytes));
+    }
+  }
+
+  get data(): string {
+    let value = this.get("data");
+    return value.toString();
+  }
+
+  set data(value: string) {
+    this.set("data", Value.fromString(value));
+  }
+
+  get accepted(): boolean {
+    let value = this.get("accepted");
+    return value.toBoolean();
+  }
+
+  set accepted(value: boolean) {
+    this.set("accepted", Value.fromBoolean(value));
+  }
+}
+
+export class Contribution extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save Contribution entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save Contribution entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("Contribution", id.toString(), this);
+  }
+
+  static load(id: string): Contribution | null {
+    return store.get("Contribution", id) as Contribution | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get bounty(): string | null {
+    let value = this.get("bounty");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toString();
+    }
+  }
+
+  set bounty(value: string | null) {
+    if (value === null) {
+      this.unset("bounty");
+    } else {
+      this.set("bounty", Value.fromString(value as string));
+    }
+  }
+
+  get contributor(): Bytes {
+    let value = this.get("contributor");
+    return value.toBytes();
+  }
+
+  set contributor(value: Bytes) {
+    this.set("contributor", Value.fromBytes(value));
+  }
+
+  get amount(): BigInt {
+    let value = this.get("amount");
+    return value.toBigInt();
+  }
+
+  set amount(value: BigInt) {
+    this.set("amount", Value.fromBigInt(value));
+  }
+
+  get refunded(): boolean {
+    let value = this.get("refunded");
+    return value.toBoolean();
+  }
+
+  set refunded(value: boolean) {
+    this.set("refunded", Value.fromBoolean(value));
+  }
+}
+
+export class Bounty extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save Bounty entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save Bounty entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("Bounty", id.toString(), this);
+  }
+
+  static load(id: string): Bounty | null {
+    return store.get("Bounty", id) as Bounty | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get creator(): Bytes {
+    let value = this.get("creator");
+    return value.toBytes();
+  }
+
+  set creator(value: Bytes) {
+    this.set("creator", Value.fromBytes(value));
+  }
+
+  get issuers(): Array<Bytes> | null {
+    let value = this.get("issuers");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBytesArray();
+    }
+  }
+
+  set issuers(value: Array<Bytes> | null) {
+    if (value === null) {
+      this.unset("issuers");
+    } else {
+      this.set("issuers", Value.fromBytesArray(value as Array<Bytes>));
+    }
+  }
+
+  get approvers(): Array<Bytes> | null {
+    let value = this.get("approvers");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBytesArray();
+    }
+  }
+
+  set approvers(value: Array<Bytes> | null) {
+    if (value === null) {
+      this.unset("approvers");
+    } else {
+      this.set("approvers", Value.fromBytesArray(value as Array<Bytes>));
+    }
+  }
+
+  get data(): string {
+    let value = this.get("data");
+    return value.toString();
+  }
+
+  set data(value: string) {
+    this.set("data", Value.fromString(value));
+  }
+
+  get deadline(): BigInt {
+    let value = this.get("deadline");
+    return value.toBigInt();
+  }
+
+  set deadline(value: BigInt) {
+    this.set("deadline", Value.fromBigInt(value));
+  }
+
+  get token(): Bytes {
+    let value = this.get("token");
+    return value.toBytes();
+  }
+
+  set token(value: Bytes) {
+    this.set("token", Value.fromBytes(value));
+  }
+
+  get tokenVersion(): BigInt {
+    let value = this.get("tokenVersion");
+    return value.toBigInt();
+  }
+
+  set tokenVersion(value: BigInt) {
+    this.set("tokenVersion", Value.fromBigInt(value));
+  }
+
+  get balance(): BigInt | null {
+    let value = this.get("balance");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set balance(value: BigInt | null) {
+    if (value === null) {
+      this.unset("balance");
+    } else {
+      this.set("balance", Value.fromBigInt(value as BigInt));
+    }
+  }
+
+  get hasPaidout(): boolean {
+    let value = this.get("hasPaidout");
+    return value.toBoolean();
+  }
+
+  set hasPaidout(value: boolean) {
+    this.set("hasPaidout", Value.fromBoolean(value));
+  }
+
+  get fulfillments(): Array<string> | null {
+    let value = this.get("fulfillments");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toStringArray();
+    }
+  }
+
+  set fulfillments(value: Array<string> | null) {
+    if (value === null) {
+      this.unset("fulfillments");
+    } else {
+      this.set("fulfillments", Value.fromStringArray(value as Array<string>));
+    }
+  }
+
+  get contributions(): Array<string> | null {
+    let value = this.get("contributions");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toStringArray();
+    }
+  }
+
+  set contributions(value: Array<string> | null) {
+    if (value === null) {
+      this.unset("contributions");
+    } else {
+      this.set("contributions", Value.fromStringArray(value as Array<string>));
+    }
+  }
+
+  get status(): string {
+    let value = this.get("status");
+    return value.toString();
+  }
+
+  set status(value: string) {
+    this.set("status", Value.fromString(value));
+  }
+}
