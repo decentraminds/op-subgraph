@@ -186,13 +186,15 @@ dataSources:
       eventHandlers:
         - event: BountyIssued(uint256,address,address[],address[],string,uint256,address,uint256)
           handler: handleBountyIssued
+        - event: ContributionAdded(uint256,uint256,address,uint256)
+          handler: handleContributionAdded
         - event: BountyFulfilled(uint256,uint256,address[],string,address)
           handler: handleBountyFulfilled
         - event: FulfillmentAccepted(uint256,uint256,address,uint256[])
           handler: handleFulfillmentAccepted
-      callHandlers:
-        - function: contribute(address,uint256,uint256)
-          handler: handlerContributeCall
+      # callHandlers:
+      #   - function: contribute(address,uint256,uint256)
+      #     handler: handlerContributeCall
       file: ./src/mappingBounties.ts
 
 

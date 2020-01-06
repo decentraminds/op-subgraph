@@ -1,4 +1,4 @@
-import { BountyIssued, BountyFulfilled, FulfillmentAccepted, ContributeCall
+import { BountyIssued, ContributionAdded, BountyFulfilled, FulfillmentAccepted, ContributeCall
   } from '../generated/StandardBounties/StandardBounties'
 import { Bounty, Fulfillment, Contribution } from '../generated/schema'
 import { BigInt, Bytes, Value } from '@graphprotocol/graph-ts'
@@ -28,6 +28,22 @@ export function handleBountyIssued(event: BountyIssued): void {
   bounty.save()
 }
 
+export function handleContributionAdded(event: ContributionAdded): void {
+  let bounty = Bounty.load(event.params._bountyId.toHex())
+  if(bounty) {
+    let contributions: Array<string> | null = bounty.contributions != null ? bounty.contributions:[]
+    let contribution = new Contribution(event.params._contributionId.toHex())
+    contribution.contributor = event.params._contributor
+    contribution.amount = event.params._amount
+    contribution.refunded = false
+    bounty.balance = bounty.balance.plus(contribution.amount)
+    contributions.push(contribution.id)
+    bounty.contributions = contributions
+    bounty.save()
+    contribution.save()
+  }
+}
+
 export function handleBountyFulfilled(event: BountyFulfilled): void {
   let bounty = Bounty.load(event.params._bountyId.toHex())
   if(bounty) {
@@ -43,12 +59,6 @@ export function handleBountyFulfilled(event: BountyFulfilled): void {
     fulfillment.accepted = false
     
     let fulfillments: Array<string> | null = bounty.fulfillments != null ? bounty.fulfillments:[]
-    // let fulfArray: Array<String> | null = []
-    // for(let i:i32 = 0; i < fulfillments.length; i++) {
-    //     fulfArray.push(fulfillments[i])
-    // }
-    // fulfArray.push(fulfillment.id)
-    // bounty.fulfillments = fulfArray
     fulfillments.push(fulfillment.id)
     bounty.fulfillments = fulfillments
     bounty.save()
@@ -65,6 +75,7 @@ export function handleFulfillmentAccepted(event: FulfillmentAccepted): void {
     fi.payouts = event.params._tokenAmounts
     fi.save()
   }
+  // TODO: set if paidout has been completed for all fulfillers
   // let bounty = Bounty.load(event.params._bountyId.toHex())
   // if (bounty) {
   //   bounty.hasPaidout = true
@@ -87,26 +98,18 @@ export function handleFulfillmentAccepted(event: FulfillmentAccepted): void {
   // }
 }
 
-export function handlerContributeCall(call: ContributeCall):void {
-  let bounty = Bounty.load(call.inputs._bountyId.toHex())
-  if(bounty) {
-    let contributions: Array<string> | null = bounty.contributions != null ? bounty.contributions:[]
-    let contribution = new Contribution(Value.fromI32(contributions.length).toBytes().toHex())
-    contribution.contributor = call.inputs._sender
-    contribution.amount = call.inputs._amount
-    contribution.refunded = false
-    bounty.balance = bounty.balance.plus(contribution.amount)
-    // let contrArray: Array<Bytes> = []
-    // for(let i:i32 = 0; i < contributions.length; i++) {
-    //   contrArray.push(contributions[i])
-    // }
-    // contrArray.push(contribution)
-    // bounty.contributions = contrArray
-    contributions.push(contribution.id)
-    bounty.contributions = contributions
-    bounty.save()
-    contribution.save()
-  }
-
-
-}
+// export function handlerContributeCall(call: ContributeCall):void {
+//   let bounty = Bounty.load(call.inputs._bountyId.toHex())
+//   if(bounty) {
+//     let contributions: Array<string> | null = bounty.contributions != null ? bounty.contributions:[]
+//     let contribution = new Contribution(Value.fromI32(contributions.length).toBytes().toHex())
+//     contribution.contributor = call.inputs._sender
+//     contribution.amount = call.inputs._amount
+//     contribution.refunded = false
+//     bounty.balance = bounty.balance.plus(contribution.amount)
+//     contributions.push(contribution.id)
+//     bounty.contributions = contributions
+//     bounty.save()
+//     contribution.save()
+//   }
+// }
